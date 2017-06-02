@@ -1,0 +1,10 @@
+{
+  "books-sql": {
+    "host": "sql3.freemysqlhosting.net",
+    "database": "sql3177971",
+    "password": "5WNEb1Tst8",
+    "name": "books-sql",
+    "connector": "mysql",
+    "user": "sql3177971"
+  }
+}

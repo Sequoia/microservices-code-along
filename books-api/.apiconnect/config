@@ -1,0 +1,19 @@
+apim_server: us.apiconnect.ibmcloud.com
+us.apiconnect.ibmcloud.com.meta:
+  formFactor: BLUEMIX_PUBLIC
+  serverCapabilities:
+    authTypes:
+      - basic
+      - token
+  toolkit:
+    version_recommended: 2.1.30
+    version_minimum: 2.1.30
+au.apiconnect.ibmcloud.com.meta:
+  formFactor: BLUEMIX_PUBLIC
+  serverCapabilities:
+    authTypes:
+      - basic
+      - token
+  toolkit:
+    version_recommended: 2.1.30
+    version_minimum: 2.1.30
