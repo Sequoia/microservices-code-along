@@ -1,5 +1,22 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 3: Creating Books API to a microservice
+
+In this step we'll be splitting the `books` route into its own microservice, built on LoopBack/API Connect (apic). While LoopBack refers to the application framework  and APIC refers more broadly to IBM's API Connect tools (including LoopBack), the terms will be used interchangeably here.
+
+For this step you'll need the [APIC command line tools installed](https://developer.ibm.com/apiconnect/getting-started/). You'll also need an account on IBM Bluemix to use the APIC GUI.
+
+## Goals
+
+1. Create LoopBack application scaffolding using the `apic` command line tool
+2. Run the APIC GUI locally
+2. Connect it to a database (create a database or use the one I offer)
+3. Use the model generators to create models based on database tables
+6. Run the API explorer and try out your books API
+   * *You'll need to add a certificate exception in your browser for the explorer to work*
+
+---
+
 # Step 2: Deploying to NOW.sh
 
 For this step, you'll need to have the [now client](https://zeit.co/download) installed. Upon your first deployment (the first time you run `now`) you'll be prompted to create an account. Free accounts are allowed 3 concurrent deployments (June 2017).
@@ -23,6 +40,10 @@ Or *almost* that easy. Some things that worked locally might fail upon deploymen
   2. `npm build`
   3. `npm start`
 * `npm build` is run in case you have any *additional setup steps such as installing more dependencies*
+
+## Solution
+
+Our `lib` dependencies were not being installed. Adding a build script to go to that directory and install those deps before starting the application fixed this.
 
 ---
 
