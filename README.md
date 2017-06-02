@@ -1,5 +1,31 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 2: Deploying to NOW.sh
+
+For this step, you'll need to have the [now client](https://zeit.co/download) installed. Upon your first deployment (the first time you run `now`) you'll be prompted to create an account. Free accounts are allowed 3 concurrent deployments (June 2017).
+
+## Deploying
+
+With the now client installed, deploying to `now.sh` is as easy as changing directories to the target directory and typing `now`.
+
+Or *almost* that easy. Some things that worked locally might fail upon deployment.
+
+## Goals
+
+1. Deploy to `now`
+2. Resolve any issues with the deployment
+3. Test routes on your live deployment.
+
+## Hints
+
+* Now runs the following during a node app deployment:
+  1. `npm install`
+  2. `npm build`
+  3. `npm start`
+* `npm build` is run in case you have any *additional setup steps such as installing more dependencies*
+
+---
+
 # Step 1: Monolith
 ## `01-Monolith`
 
@@ -21,12 +47,12 @@ In the interest of simplifying the code and focusing on features and infrastruct
 ## Goals
 
 1. Get the application up and running
-  * `npm start`
+   * `npm start`
 2. Try out API functionality
-  1. `/books`
-  2. `/books/{id}`
-  3. `/buy/{id}`
-  4. `/download/{path}`
-  5. `/auth/register`
-  6. `/auth/login`
-  7. `/auth/logout`
+   1. `/books`
+   2. `/books/{id}`
+   3. `/buy/{id}`
+   4. `/download/{path}`
+   5. `/auth/register`
+   6. `/auth/login`
+   7. `/auth/logout`
