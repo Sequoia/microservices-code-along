@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "build": "cd lib && npm install",
     "start": "node app.js"
   },
   "keywords": [],
