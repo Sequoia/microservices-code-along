@@ -1,5 +1,30 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 4: Customizing our models
+
+In this step we'll add relationships to our models, hide some data by default, and add a remote method.
+
+## Goals
+
+1. Hide `filepath` from books response
+2. Create relationships:
+   1. Book belongsTo Author
+   1. Book belongsTo Language
+3. Return these related records by default
+3. Create a `getDownloadPath` remote method on Books
+0. Set root API path to `/` (instead of `/api`)
+4. Run your API and test
+
+## Hints
+
+1. https://loopback.io/doc/en/lb2/Model-definition-JSON-file.html#hidden-properties
+2. https://loopback.io/doc/en/lb3/BelongsTo-relations.html#defining-a-belongsto-relation
+3. https://loopback.io/doc/en/lb3/Model-definition-JSON-file.html#default-scope
+4. https://loopback.io/doc/en/lb3/Remote-methods.html#how-to-add-a-remote-method-to-a-model
+   * Books.remoteMethod('prototype.getDownloadPath' ...
+
+---
+
 # Step 3: Creating Books API to a microservice
 
 In this step we'll be splitting the `books` route into its own microservice, built on LoopBack/API Connect (apic). While LoopBack refers to the application framework  and APIC refers more broadly to IBM's API Connect tools (including LoopBack), the terms will be used interchangeably here.
