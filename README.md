@@ -1,5 +1,41 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 5: Update books service to point to LoopBack books API
+
+We have now extracted our books API, but within our monolith application, we're still calling the local books in-memory "database" from our books and payments router. We'll fix that here so they point to the external API.
+
+We'll use the `superagent` module to simplify sending HTTP requests
+
+## Goals
+
+1. Alter `services/books.js` so it calls our local LoopBack app (`http://localhost:3000/Books`)
+   * This will require switching to an asynchronous (i.e. Promises based) API
+1. Alter books router so it uses supports the new (promise based) books service
+1. Alter payments router so it uses supports the new (promise based) books service
+1. Test that routes still work
+   * `/Books`
+   * `/Books/2`
+   * `/buy/2`
+
+## Hints
+
+* Your application server runs locally on port 8080
+* The loopback server runs locally on port 3000
+
+```js
+const request = require('superagent');
+
+request.get('http://example.com/foo.json')
+  .then(response => {
+    console.log(response.body); //superagent automatically parses JSON body
+  })
+  .catch(e => {
+    console.error('connection error!');
+  })
+```
+
+---
+
 # Step 4: Customizing our models
 
 In this step we'll add relationships to our models, hide some data by default, and add a remote method.
