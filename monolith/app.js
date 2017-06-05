@@ -1,3 +1,4 @@
+require('dotenv').config();
 const port = process.env.PORT || 8080;
 // ^^ CONFIG ^^ //
 
@@ -6,13 +7,11 @@ const static = require('express').static;
 const {sessionSetup} = require('./lib/localAuth');
 const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
-const booksRouter = require('./routes/books');
 const requireLogin = require('./lib/middleware/requireLogin');
 
 app.use(sessionSetup);
 
 app.use('/auth', authRouter);
-app.use('/Books', booksRouter);
 //require login for payment router
 app.use('/buy', requireLogin, paymentsRouter);
 //redirect index to our books router for book listing

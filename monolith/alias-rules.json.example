@@ -1,0 +1,6 @@
+{
+  "rules" : [
+    { "pathname" : "Books**", "dest" : "<yourname>-books-api.now.sh" },
+    { "dest": "monolith-xxxxx.now.sh" }
+  ]
+}
