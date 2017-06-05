@@ -1,5 +1,34 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 8: Deploying our books api to Bluemix
+
+In addition to the api building and datasource configuring tools provided by API Connect, APIC integrates with IBM cloud platform (Bluemix) to make deploying there easy.
+
+In this step, we'll deploy the application to bluemix using the APIC GUI, then create an alias on `now.sh` pointing to it. This will allow us to swap out the LoopBack API server running on `now.sh` with one running on Bluemix without the client (browser) knowing that anything has changed!
+
+The Bluemix dashboard is a bit overwhelming, but we only need to set up a few things to prepare to deploy our API:
+
+1. A "service"
+2. An "app"
+
+Navigate to https://console.ng.bluemix.net/dashboard/apps and log in to create a service and an app (possibly also an "org" and a "space" and a "product" 😄).
+
+With that done, it should be possible to deploy our updated LoopBack app from the GUI run locally by running `apic edit` from the `books-api` directory.
+
+## Goals
+
+1. Deploy updated LoopBack application to bluemix
+2. Create a new "route" for it in bluemix: `<yourname>-books-api.mybluemix.net`
+3. Test that it works
+4. Point `<yourname>-books-api.now.sh` to `<yourname>-books-api.mybluemix.net` using an alias rule on now.sh
+
+## Hints
+
+1. If the local API designer (launched via `apic edit`)  does not show you an organization when you click "publish" > "add IBM bluemix target", make sure you've set up a "service" and an "app" in the [bluemix dashboard](https://console.ng.bluemix.net/dashboard/apps) and try again
+2. From the dashboard, on your app page: "Routes" > "Edit routes" & add a route under `mybluemix.net`
+3. Make sure to set the appropriate environment variables! (sidebar > runtime > environment variables)
+4. It's not possible to alias to external services using `now alias <external> <alias-name>`, but you *can* do it using a rules file.
+
 # Step 7: Replacing our books router with the LoopBack API
 
 So far, we've externalized our books API, but we haven't fully split that portion of the application off from the monolith: requests to `/Books` still pass through the Express `books` router on our monolith. We'll complete the process of splitting off this portion off the application by removing the book router and passing requests directly to the books API app.
