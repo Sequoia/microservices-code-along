@@ -4,24 +4,20 @@ const books = require('../lib/services/books');
 module.exports = router;
 
 router.get('/', function (req, res){
-  res.json(books.findAll().map(formatBook));
+  books.findAll()
+    .then(response => {
+      res.json(response);
+    });
 });
 
 router.get('/:id', function (req, res){
-  let book = books.find(req.params.id)
-  if(book){
-    res.json(formatBook(book));
-  }else{
-    res.status(404).json({
-      'message' : 'Not found'
+  books.find(req.params.id)
+    .then(book => {
+      res.json(book);
+    })
+    .catch(() => {
+      res.status(404).json({
+        'message' : 'Not found'
+      });
     });
-  }
 });
-
-function formatBook(book){
-  //hide download path
-  delete book.filepath;
-  //fix cover path
-  book.thumbnail = url.resolve('/covers/', book.thumbnail);
-  return book;
-}
