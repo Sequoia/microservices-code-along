@@ -1,5 +1,34 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 7: Replacing our books router with the LoopBack API
+
+So far, we've externalized our books API, but we haven't fully split that portion of the application off from the monolith: requests to `/Books` still pass through the Express `books` router on our monolith. We'll complete the process of splitting off this portion off the application by removing the book router and passing requests directly to the books API app.
+
+We access our books api in two ways:
+
+1. Via direct HTTP requests to `/Books` from clients
+2. *Internally*, from our payments router
+
+For (1), we can completely remove the books router & pass through to the LoopBack app, and our monolith doesn't need to be concerned with where this is. For (2), our monolith *does* still need to know where the books API is. We'll externalize the `BOOKS_API` URl so we can change it by environment but still access it from our payments router.
+
+## Goals
+
+1. Externalize `BOOKS_API` to an environment variable
+    * Set it to point to our `<yourname>-books-api.now.sh` deployment
+2. Deploy our updated monlith app to `now`
+3. Set an alias rule on `monolith` that passes requests to `/Books**` through to `<yourname>-books-api.now.sh`
+3. Set an alias rule on `monolith` that passes `<yourname>-monolith.now.sh` through to the most recently deployed instance of `monolith`
+4. Remove the `books` router
+    * Redeploy app & update `monolith` alias to point to new deployment
+
+## Hints
+
+* Once the `books` router is removed, it will no longer be possible to request that route on our locally running `monolith` application
+* See [now docs](https://zeit.co/docs/features/path-aliases) for info on alias rules files. There should be two paths: one for `/Books**` and one for all other requests.
+* [dotenv](https://www.npmjs.com/package/dotenv) makes it easy to load `.env` files locally
+
+---
+
 # Step 6: Deploying books API to `now`
 
 In this step, we'll deploy our updated books API to `now`. Before doing so, we'll clean it up so we do not expose our database credentials. As you work with now, it will be useful to delete deployments you're no longer using, so be sure to `now rm <deployment|alias>` from time to time.
