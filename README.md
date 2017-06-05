@@ -1,5 +1,24 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 6: Deploying books API to `now`
+
+In this step, we'll deploy our updated books API to `now`. Before doing so, we'll clean it up so we do not expose our database credentials. As you work with now, it will be useful to delete deployments you're no longer using, so be sure to `now rm <deployment|alias>` from time to time.
+
+## Goals
+
+1. Externalize database connection configuration
+2. Deploy with environment variables (via `-E`)
+3. Alias our books API as `<yourname>-books-api.now.sh`
+
+## Hints
+
+1. Externalizing database credentials will require two steps:
+    1. Referring to environment variables from [loopback](https://loopback.io/doc/en/lb3/Attaching-models-to-data-sources.html#specifying-database-credentials-with-environment-variables)
+    2. Setting those variables in the environment in which your app will run (e.g. [now](https://zeit.co/docs/features/env-and-secrets))
+
+
+---
+
 # Step 5: Update books service to point to LoopBack books API
 
 We have now extracted our books API, but within our monolith application, we're still calling the local books in-memory "database" from our books and payments router. We'll fix that here so they point to the external API.
