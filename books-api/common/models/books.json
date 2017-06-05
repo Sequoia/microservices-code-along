@@ -103,7 +103,24 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "author" : {
+      "type" : "belongsTo",
+      "model": "Authors"
+    },
+    "language" : {
+      "type" : "belongsTo",
+      "model": "Languages"
+    }
+  },
+  "scope": {
+    "include" : [
+      "author", "language"
+    ]
+  },
+  "hidden": [
+    "filepath"
+  ],
   "acls": [],
   "methods": {}
 }
