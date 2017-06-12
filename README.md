@@ -1,5 +1,49 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 10: Externalizing Authentication
+
+In order to scale our main web app ("monolith") separately from authentication, we'll need to split authentication off as its own microservice. This presents a problem, however, vis-a-vis authentication: sessions are currently stored in memory and memory is not shared across processes (i.e. between webapp instances and our auth microservice instance). In order to share sessions across processes, we'll need to store our session information in an external data store. We'll use Redis for this.
+
+We also need a way to share cookies across domains, i.e. between `xxx-monolith.now.sh` and `xxx-auth.now.sh`. This can be solved using now.sh aliases: by proxying calls from `xxx-monolith.now.sh/auth**` to `xxx-auth.now.sh`, the auth service will recieve the same cookies as the main (monolith) service.
+
+The properties we'll need shared across instances/services are:
+
+1.  The "session secret" (allowing sessions to be created/looked up the same way)
+2.  The session store location (our redis server)
+
+## Goals
+
+1.  Create external redis instance to store sessions
+    * pass location as `REDIS_SESSION_URL` environment variable
+2.  Externalize session secret
+    * pass as `SESSION_SECRET` environment variable
+3.  Modify passport configuration to use a redis session store
+4.  Split `auth` routes off as their own microservice
+5.  Deploy new auth server and monolith server
+6.  Alias `/auth**` routes on our monolith to our auth service
+7.  Verify that the following routes work:
+    * `/login.html`
+    * `/auth/account`
+    * `/Books/1`
+    * `/buy/1`
+
+## Hints
+
+**This step is a doozy so it's advisable to check the diff against the next step and see what's changed**
+
+*   https://redislabs.com/ offers free redis hosting
+*   Our passport stuff is already (conveniently!) separate from our monolith, living in `/lib`. This will make it easier to share across services
+*   Add `SESSION_SECRET` and `REDIS_SESSION_URL` to `.env` files for both services
+*   Add `prestart` `check-env` checks
+*   The following can simply be moved from `monolith` to `auth`:
+    * `/routes/auth` (also move routing lines from `app.js`)
+    * `lib` link can be copied to `auth`
+    * `package.json.build` script can be copied to `auth/package.json`
+    * `package.json.prestart` script can be copied to `auth/package.json`
+*   We'll leave `assets/login.html` on the `monolith` because it's part of our "frontend" and not "login logic"
+* `connect-redis` can be used (in `lib` package) to back sessions with Redis
+
+
 # Step 9: Tying our Bluemix books API into our "monolith"
 
 Currently, we have our books API running on bluemix and a standalone `now` alias pointing to it, but this alias isn't much use by itself. What we need is for our main application ("monolith") to know about the books API. The two things it needs to be able to do is:
