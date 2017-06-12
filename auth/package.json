@@ -4,9 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "cd lib && npm install",
+    "prestart": "check-env SESSION_SECRET REDIS_SESSION_URL",
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "Sequoia McDowell <sequoia.mcdowell@gmail.com> (http://sequoia.makes.software/)",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "check-env": "^1.3.0",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3"
+  }
 }

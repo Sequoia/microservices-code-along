@@ -5,13 +5,11 @@ const port = process.env.PORT || 8080;
 const app = require('express')();
 const static = require('express').static;
 const {sessionSetup} = require('./lib/localAuth');
-const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
 const requireLogin = require('./lib/middleware/requireLogin');
 
 app.use(sessionSetup);
 
-app.use('/auth', authRouter);
 //require login for payment router
 app.use('/buy', requireLogin, paymentsRouter);
 //redirect index to our books router for book listing
