@@ -1,0 +1,5 @@
+{
+  "rules" : [
+    { "dest": "<yourname>-books-api.mybluemix.net" }
+  ]
+}

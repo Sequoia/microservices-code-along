@@ -29,6 +29,13 @@ With that done, it should be possible to deploy our updated LoopBack app from th
 3. Make sure to set the appropriate environment variables! (sidebar > runtime > environment variables)
 4. It's not possible to alias to external services using `now alias <external> <alias-name>`, but you *can* do it using a rules file.
 
+## Solution
+
+### Aliasing
+
+1.  Create an alias rules json file like the one shown in [books-api/alias-rules.json.example](books-api/alias-rules.json.example)
+2.  Deploy alias with `now alias --rules alias-rules.json <yourname>-books-api.now.sh`
+
 # Step 7: Replacing our books router with the LoopBack API
 
 So far, we've externalized our books API, but we haven't fully split that portion of the application off from the monolith: requests to `/Books` still pass through the Express `books` router on our monolith. We'll complete the process of splitting off this portion off the application by removing the book router and passing requests directly to the books API app.
