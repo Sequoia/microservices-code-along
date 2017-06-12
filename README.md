@@ -1,5 +1,55 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 11: Now.sh Deployment Cleanup
+
+Our deploy is starting to get complicated, so it's a good time to step back and reorganize. In this short step we will consolidate our env settings for easier sharing across services, set up some default alias rules so we don't have to edit our `alias-rules.json` each deploy, and set up an overarching alias configuration to tie our services together.
+
+## Aliasing
+
+Hitherto, in order to point an alias to our newest deployment of a service, we'd note the deployment ID and modify our rules file to match. Another approach to this is to encode the alias name in a file that lives in the project. `now` allows us to [set various configuration options in `now.json`](https://zeit.co/blog/now-json#`alias`-(string|array)). We'll set a `now.alias` property for our each service, allowing us run `now alias` after each deploy to link that alias to the latest deploy.
+
+We'll set up an overarching alias rules file to tie all of our aliased applications together.
+
+## Environment variables & secrets
+
+In order to automatically include environment variables in our deployment, we can add a `env` object to `now.json` with the environment variables. We don't want to check our database passwords in with our code of course, so we'll use [secrets](https://zeit.co/docs/features/env-and-secrets) in our `now.json` and `now` will read our secret values into the environment at deploy time.
+
+## Additional considerations
+
+This setup does tie us (slightly) to `now.sh` as a platform, but any deployment environment/platform will require some platform-specific configuration. Furthermore, as this deals primarily with proxy rules & environment variables, everything is outside our code, so migrating to another platform should not require code-changes.
+
+## Goals
+
+1.  Store the following secrets with `now secret`
+    1. `@redis-session-url`
+    2. `@session-secret`
+2.  Set `now` object in now.json for the following modules:
+    1. Auth:
+        * `alias` : `<yourname>-auth.now.sh`
+        * `env` : `REDIS_SESSION_URL` (secret), `SESSION_SECRET` (secret)
+    1. Monolith:
+        * `alias` : `<yourname>-webapp.now.sh`
+        * `name` : `webapp` (renaming this from monolith, which will be our top-level domain alias)
+        * `env` : `REDIS_SESSION_URL` (secret), `SESSION_SECRET` (secret), `BOOKS_API` (copy from `.env`)
+3.  Create an overarching `monolith-alias.json` file that passes through:
+    1. `auth**` to `<yourname>-auth.now.sh`
+    2. `Books**` to `<yourname>-books-api.mybluemix.net`
+    3. everything else to `<yourname>-webapp.now.sh`
+4.  Deploy & alias auth & webapp (**_don't_ use `-E`!**)
+5.  Create top-level `<yourname>-monolith.now.sh` alias using `monolith-alias.json` rules
+6.  Check that things still work!
+
+## Hints
+
+*   https://zeit.co/docs/features/env-and-secrets#securing-env-variables-using-secrets
+    * `now secret add redis-session-url <your-value-here>`
+*   `now.json` configuration: https://zeit.co/blog/now-json
+*   The `now` CLI has [a bug wherein `.gitignore` in parent directories are not respected](https://github.com/zeit/now-cli/issues/667) at the time of this writing. Add `.npmignore` files to `auth` & `monolith` to get around this. The files should look like this:
+    ```
+    .env
+    ```
+*   Normally we'd track `now.json` in git, I have ignored it and added `now.json.example` files so my `sequoia-` aliases don't clobber your `<yourname>-` aliases.
+
 # Step 10: Externalizing Authentication
 
 In order to scale our main web app ("monolith") separately from authentication, we'll need to split authentication off as its own microservice. This presents a problem, however, vis-a-vis authentication: sessions are currently stored in memory and memory is not shared across processes (i.e. between webapp instances and our auth microservice instance). In order to share sessions across processes, we'll need to store our session information in an external data store. We'll use Redis for this.
