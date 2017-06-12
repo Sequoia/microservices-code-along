@@ -4,3 +4,5 @@ npm-debug.log
 .env
 **/.targets
 alias-rules.json
+monolith-alias.json
+now.json

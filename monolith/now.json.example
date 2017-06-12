@@ -1,0 +1,9 @@
+{
+  "alias": "<yourname>-webapp.now.sh",
+  "name" : "webapp",
+  "env" : {
+    "REDIS_SESSION_URL" : "@redis-session-url",
+    "SESSION_SECRET" : "@session-secret",
+    "BOOKS_API" : "https://sequoia-books-api.mybluemix.net/Books/"
+  }
+}

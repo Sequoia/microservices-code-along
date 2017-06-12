@@ -1,0 +1,7 @@
+{
+  "rules" : [
+    { "pathname" : "/Books**", "dest": "https://<yourname>-books-api.mybluemix.net" },
+    { "pathname" : "/auth**", "dest": "<yourname>-auth.now.sh" },
+    { "dest" : "<yourname>-webapp.now.sh" }
+  ]
+}

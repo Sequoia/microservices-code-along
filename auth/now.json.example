@@ -1,0 +1,7 @@
+{
+  "alias": "<yourname>-auth.now.sh",
+  "env" : {
+    "REDIS_SESSION_URL" : "@redis-session-url",
+    "SESSION_SECRET" : "@session-secret"
+  }
+}

@@ -1,7 +1,0 @@
-{
-  "rules" : [
-    { "pathname" : "Books**", "dest" : "<yourname>-books-api.mybluemix.net" },
-    { "pathname" : "auth**", "dest" : "auth-xxx.now.sh" },
-    { "dest": "monolith-xxxxx.now.sh" }
-  ]
-}
