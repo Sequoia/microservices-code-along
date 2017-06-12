@@ -1,5 +1,37 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 9: Tying our Bluemix books API into our "monolith"
+
+Currently, we have our books API running on bluemix and a standalone `now` alias pointing to it, but this alias isn't much use by itself. What we need is for our main application ("monolith") to know about the books API. The two things it needs to be able to do is:
+
+1.  Proxy client requests to `/Books**` through to the books API
+2.  Call the books API internally (for the `/buy` route)
+
+Feature (2) is required, and feature (1) is useful because it allows us to present organize our microservices under a single domain, which wins us some performance gains and generally simplifies things for the client. In order to achieve these goals we'll need to update:
+
+1. Alias settings (to pass `/Books**` through to a different location)
+2. The `BOOKS_API` environment variable (for internal calls)
+
+## Extra Feature: `check-env`
+
+Because this is a small step, we'll add one more feature during this step that will help us catch issues during deployment. Our application relies on certain environment variables being set, without which our application may start but will fail to actually run. If our application won't run properly, it's best to bail out as early as possible. To this end, we'll add a `prestart` lifecycle script to check that the requisite environment variables are set and bail out if they aren't.
+
+In our case, this is especially helpful to catch if we deploy using `now` and forget to pass `-E`. `now` runs `npm start` to start our application, and npm will automatically run a `prestart` script before running `start`, so this is a good place to put our environment variable check.
+
+## Goals
+
+1.  Update alias settings to pass through to Bluemix
+2.  Update `BOOKS_API` to point to Bluemix
+3.  Add a `prestart` script to check for `BOOKS_API` environment variable
+4.  With new deployment, check that the following still work:
+    1. `/Books`
+    2. `/buy/1`
+
+## Hints
+
+* https://www.npmjs.com/package/check-env#cli-usage
+* https://docs.npmjs.com/misc/scripts
+
 # Step 8: Deploying our books api to Bluemix
 
 In addition to the api building and datasource configuring tools provided by API Connect, APIC integrates with IBM cloud platform (Bluemix) to make deploying there easy.
