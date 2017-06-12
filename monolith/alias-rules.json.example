@@ -1,6 +1,6 @@
 {
   "rules" : [
-    { "pathname" : "Books**", "dest" : "<yourname>-books-api.now.sh" },
+    { "pathname" : "Books**", "dest" : "<yourname>-books-api.mybluemix.net" },
     { "dest": "monolith-xxxxx.now.sh" }
   ]
 }

@@ -32,6 +32,31 @@ In our case, this is especially helpful to catch if we deploy using `now` and fo
 * https://www.npmjs.com/package/check-env#cli-usage
 * https://docs.npmjs.com/misc/scripts
 
+## Solution
+
+### Environment check
+
+* `npm i -S check-env`
+* in `package.json.scripts`: `"prestart" : "check-env BOOKS_API"`
+
+### Bluemix proxying
+
+* Update `.env` so it looks like [monolith/.env.example](monolith/.env.example)
+* Redeploy (and note the new deployment URL)
+* Update `alias-rules.json` so it looks like [monolith/alias-rules.json.example](monolith/alias-rules.json.example)
+* `now alias --rules alias-rules.json <yourname>-monolith.now.sh`
+
+
+### Alternate approach to proxying
+
+Instead of pointing `BOOKS_API` directly to `mybluemix.net/Books`, we could point it to `<yourname>-monolith.now.sh`. Because calls to `<yourname>-monolith.now.sh/Books**` are proxied to `mybluemix.net`, the internal call still end up ultimately hitting our Bluemix API server. The advantage to this approach is that we could update our alias to point `/Books**` somewhere else and our internal calls would also go to the new address **without us having to redeploy with new ENV vars**. The request would work thus:
+
+1.  Internally, `/buy` route calls `GET <yourname>-monolith.now.sh/Books/1/getDownloadPath`
+2.  Now.sh reads alias for `<yourname>-monolith.now.sh/Books**`
+3.  Now.sh passes the request through to `<yourname>-books-api.mybluemix.net/Books/1/getDownloadPath`
+
+The disadvantage of this approach is that it's a bit more confusing, which is why we went with the more straightforward approach outlined above. :smile:
+
 # Step 8: Deploying our books api to Bluemix
 
 In addition to the api building and datasource configuring tools provided by API Connect, APIC integrates with IBM cloud platform (Bluemix) to make deploying there easy.
