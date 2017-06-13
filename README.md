@@ -1,5 +1,32 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 12: Externalizing User Records
+
+Hitherto, we've been using an in-memory user store. This is obviously not a robust solution, and we will fix it it this step!
+
+In this step we'll create a mongo collection to store users, create a [mongoose](https://www.npmjs.com/package/mongoose) model to handle users from our application, and update our auth configuration to work with this new datasource.
+
+## Goals
+
+1.  Create Mongo database on mlab.com
+    * Create an mlab account
+    * Create a "MongoDB Deployment"
+    * Create a "database user" for this deployment
+    * **Note the password for that database user**
+2.  Create a `User` model using the Mongoose ODM
+    * Mongoose is tangential to this workshop, so we'll simply copy in our mongoose User model.
+    * Create a default/admin user
+3.  Update our `localAuth` to use the `User` model
+4.  Add a secret & environment variable setting for `MONGO_USER_URL`
+5.  Deploy and alias a new version of our `auth` service
+6.  Check that login, logout, buy etc. still work
+
+## Hints
+
+* Mongoose methods are asynchronous and return promises: parts of our auth application that touch mongoose will need to be updated to work with promises.
+* Although the `webapp` service uses the same `lib/localAuth`, it should not need to be redeployed, as it only uses the session checking portion, not the user lookup portion.
+* `passport.serializeUser` needs to be updated to convert the Mongoose `User` model object to plain JSON: `user.toJSON()`
+
 # Step 11: Now.sh Deployment Cleanup
 
 Our deploy is starting to get complicated, so it's a good time to step back and reorganize. In this short step we will consolidate our env settings for easier sharing across services, set up some default alias rules so we don't have to edit our `alias-rules.json` each deploy, and set up an overarching alias configuration to tie our services together.
