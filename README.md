@@ -1,5 +1,44 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 13: Removing Assets: Thumbnails
+
+Our thumbnail images are bundled with each "webapp" deployment and served by the webapp. This is less-than-ideal for several reasons:
+
+1. There's no need to deploy multiple full copies of our thumbnails
+2. This is "data" not "code" and therefor should be separate from our codebase
+3. Node/Express is the ideal solution for serving static files
+
+We'll move these assets to S3 which is better suited for serving static files. We'll also need to tell our books API server where thumbnails live (`THUMBNAIL_PATH`) and [add a `loaded` operation hook](https://loopback.io/doc/en/lb3/Operation-hooks.html#loaded) to our LoopBack Books model so it can modify responses to book lookups by prepending the thumbnail path (`book.thumbnail = url.resolve(THUMBNAIL_PATH, book.thumbnail`).
+
+## Goals
+
+1.  Add an operation hook to Books model to make it prepend a base path to thumbnails
+    * Test it locally
+    * Deploy to APIC
+2.  Move static files to an S3 Bucket
+3.  Expose S3 bucket publicly
+    * Update Books API on APIC to point to S3
+4.  See that it works
+5.  Remove `assets/covers/` from monolith assets
+
+## Hints
+
+*   S3 *does not expose buckets as websites by default*, you  must enable it
+*   You can test the LoopBack API server locally with `npm start`, just remember to pass it the appropriate environment variables (`BOOKS_DB` & `THUMBNAIL_PATH`)
+*   `/covers/` is a reasonable default value if `process.env.THUMBNAIL_PATH` is not set
+*   [Operation Hooks](https://loopback.io/doc/en/lb3/Operation-hooks.html#loaded)) work thus:
+    ```js
+    // common/models/books.js
+
+    Books.observe('loaded', function(ctx, next){
+      ctx.data; // book record to be modified
+      next();   // call this when done
+    })
+    ```
+
+*   If you prefer to keep everything going through your `*-monolith.now.sh` domain, try setting it up with an alias (instead of pointing directly to S3)
+*   See `/misc/thumbnails-s3-policy.json` for a policy that will make your S3 bucket public.
+
 # Step 12: Externalizing User Records
 
 Hitherto, we've been using an in-memory user store. This is obviously not a robust solution, and we will fix it it this step!
