@@ -1,4 +1,6 @@
 'use strict';
+const url = require('url');
+const thumbnail_path = process.env.THUMBNAIL_PATH || '/covers/';
 
 module.exports = function(Books) {
   Books.prototype.getDownloadPath = function getDownloadPath(done){
@@ -13,6 +15,12 @@ module.exports = function(Books) {
       description: 'Sends download path for book purchases'
     }
   );
+
+  Books.observe('loaded', function prependThumbnailPath(ctx, next) {
+    // prepend thumbnail path
+    ctx.data.thumbnail = url.resolve(thumbnail_path, ctx.data.thumbnail);
+    next();
+  });
 
   return Books;
 };
