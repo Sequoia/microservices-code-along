@@ -1,5 +1,60 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 14a: Removing Assets: Downloads
+
+We will now remove our `downloads` directory to an S3 bucket as well, but because we want to restrict access to these assets, we'll need some authorization checks in front of it. We'll put them therefor in a bucket we *do not* expose over HTTP, but instead, expose through a Lambda. That will allow us to check download authorization before sending them the file. We'll save authorization for next step. In this step we'll get our Lambda set up, taking requests over HTTP, reading files from S3, and sending them back to the user.
+
+This is a rather large step, so you're encouraged to refer to the finished version as needed. (Of course you can always do this as desired!).
+
+:information_source: This step assumes you've already got serverless up and running and deployed a "hello world" service.
+
+## Goals
+
+1.  Create an S3 bucket for Downloads
+2.  Create a "serverless" function that:
+    1.  Takes a filename as a query parameter (`?token=filename.txt`)
+    2.  Reads the file from S3
+    3.  Sends it back to the user
+3.  Time allowing: handle 403s, 404s, & 500 errors
+
+## Hints
+
+*   Create the S3 bucket (`books-downloads`) in the same region for simplicity (`us-west-2` in this repository)
+*   `$ sls create --template aws-nodejs --path download-service`
+    * set `provider.stage`
+    * set `provider.region`
+*   Delete the rest of the comments in the `serverless.yaml` -- they mostly go over things you don't need, frequently using **more complex/confusing syntax than you need**.
+*   Your function will need:
+    * The name of the bucket (passed as an environment variable)
+    * Permissions to access that bucket (an `iamRoleStatement` allowing `s3:GetObject` on the bucket `arn`)
+*   Set properties to be shared as custom properties & reference them elsewhere:
+
+    ```yaml
+    custom:
+      snacksBucket: snack-bucket-123
+
+    functions:
+      triscuts:
+        environment:
+          BUCKET: ${self:custom.snacksBucket}
+        iamRoleStatements:
+          - Effect: Allow
+            Resource: "arn:aws:s3:::${self:custom.snacksBucket}/*"
+        # ...
+    ```
+
+*   The S3 SDK can return promises if you append `.promise()` to a call
+
+    ```js
+    s3.getObject({
+      Key: 'file123.txt'
+    })
+    .promise()
+    .then(file => {
+      console.log(String(file.Body));
+    })
+    ```
+
 # Step 13: Removing Assets: Thumbnails
 
 Our thumbnail images are bundled with each "webapp" deployment and served by the webapp. This is less-than-ideal for several reasons:
