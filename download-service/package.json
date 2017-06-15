@@ -5,7 +5,8 @@
   "main": "books.js",
   "dependencies": {
     "aws-sdk": "^2.70.0",
-    "jsonwebtoken": "^7.4.1"
+    "jsonwebtoken": "^7.4.1",
+    "serverless-kms-secrets": "^0.9.5"
   },
   "devDependencies": {},
   "scripts": {
