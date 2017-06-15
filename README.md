@@ -1,5 +1,55 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 14d: Generating JWTs on our "webapp" server
+
+Our lambda is now verifying JWTs, but we need some way for users to generate them. Currently, the "buy" on our webapp server (in the `monolith` directory) does the following:
+
+1.  Checks if a user is logged in
+2.  Passes the request to the `payments` router which...
+2.  Calls `getDownloadPath` on the `books` service, which...
+    1.  Gets the filename from our LoopBack books API server via the `getDownloadPath` remote method and...
+    2.  Prepends `/download/` before returning the path to the payments router which...
+3.  Sends a `Location` header to the client using Express's `res.redirect` method
+
+We need to alter the behavior in the following ways:
+
+1.  Replace the base download path (`/download/`) with the path to our `download` serverless function endpoint
+    * We can externalize `DOWNLOAD_PATH` as an environment variable, just as we did with `THUMBNAIL_PATH`
+2.  Replace the file path (`/download/${filepath}`) with a querystring `?token=<JWT Token>`
+    * The payments router will need `jsonwebtoken` installed & to have *the same* `JWT_SECRET` available
+    * The token should contain `username`, `filename`, and be set to expire in 2 minutes
+
+## Goals
+
+1.  `GET <yourname>-monolith.now.sh/buy/1` redirects (logged in) users to our lambda with a valid token
+2.  Client experience is effectively the same as before
+3.  Download link no longer works after 2 minutes
+4.  Deploy to `now.sh` & verify functionality
+
+## Hints
+
+
+*   Building the download path (`/download/${filename}`) is currently handled in the `books` service, but we'll need to move that logic to the payments router so we have access to the username on request object. We need the username & filename to generate the token.
+*   Our webapp needs **the same** `JWT_SECRET` in order to generate tokens that our download service will consider valid. This shared secret is the stateless "link" between the two services.
+*   Testing authentication locally is tricky without the aliasing that links the auth & webapp microservices that we have on now. Here is a workaround:
+    1. Run your auth server locally via `node app.js` (it will run on `localhost:8090`)
+    2. Edit `monolith/assets/login.html` so the form `action=localhost:8090/auth/login`
+    3. Start your webapp service
+    4. Navigate to `localhost:8080/login.html` and log in
+    
+    You now have a valid session! You can undo the changes in `login.html`. Note that your session will continue to be valid on `localhost` (until it expires) as long as you don't hit the `auth/logout` route, *even if you shut down one or the other local server*. How this works is an exercise left to the reader!
+
+*   A user record (`req.user`) looks like this:
+    ```json
+    {
+        _id: '593f2453a89fbc64c3a84b70',
+        username: 'admin',
+        password: '$2a$04$WjYPkwmKu50huWBzqzbble1DemQ/xI8tQcTZOXMi1E2YNQA8W0uFq',
+        __v: 0
+    }
+    ```
+* Refer to `download_service/_events/generateSignedRequest.js` for `jsonwebtoken` usage example.
+
 # Step 14c: Encrypting our JWT Secret
 
 We do not want to write our plaintext JWT secret and commit it to our source code repository, as it may fall into the wrong hands that way! In this step we'll encrypt our JWT secret so it can safely be committed to our git repository, pass the encrypted secret to our Lambda, then decrypt it on the Lambda. But how will we handle the encryption keys so they are accessible to us (to encrypt values) and on our Lambda (to decrypt them)?
