@@ -1,5 +1,61 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 14c: Encrypting our JWT Secret
+
+We do not want to write our plaintext JWT secret and commit it to our source code repository, as it may fall into the wrong hands that way! In this step we'll encrypt our JWT secret so it can safely be committed to our git repository, pass the encrypted secret to our Lambda, then decrypt it on the Lambda. But how will we handle the encryption keys so they are accessible to us (to encrypt values) and on our Lambda (to decrypt them)?
+
+AWS offers a "Key Management Service" to handle encryption and decryption, for example in a Lambda. There's also a serverless plugin that allows us to the same key to encrypt values locally on our machine. We'll use this plugin ([`serverless-kms-secrets`](https://www.npmjs.com/package/serverless-kms-secrets)) to encrypt locally, store the values, and decrypt on lambda so our JWT_SECRET stays secret!
+
+Before we can use this tool to encrypt locally, we'll need to:
+1.  [Create a KMS key](https://console.aws.amazon.com/iam/home#/encryptionKeys/us-west-2)
+2.  Give our `serverless-admin` AWS user access to it
+4.  Install `serverless-kms-secrets` locally to our project
+5.  Add `- serverless-kms-secrets` to the top level `plugins:` property in our `serverless.yaml`
+3.  Copy the key id for the first time we run `sls encrypt`
+6.  Add `kmsSecrets: ${file(kms-secrets.${opt:stage, self:provider.stage}.${opt:region, self:provider.region}.yml)}` to our top level `custom` property in our `serverless.yaml`
+
+## Goals
+
+1.  Create a yaml file with our encrypted `JWT_SECRET`
+2.  Grant our function access to the `KMS:Decrypt` action with this key
+3.  Alter the `download` function to decrypt the `JWT_SECRET` before verifying our token
+
+## Hints
+
+*   Key decryption is asynchronous and also has a `.promise()` method
+    ```js
+      const kms = new AWS.KMS();
+      kms.decrypt({
+        CiphertextBlob: Buffer(process.env.FOO_BAR, 'base64')
+      })
+      .promise()
+      .then(data => String(data.plaintext))
+      .then(plaintext => console.log(`here's the secret: ${plaintext}`))
+    ```
+
+*   Add this function to `books.js` to simplify decryption:
+
+    ```js
+    function decrypt(ciphertext){
+      console.log(`decrypting ${ciphertext}`);
+
+      return kms.decrypt({
+        CiphertextBlob: Buffer(ciphertext, 'base64')
+      })
+      .promise()
+      .then(data => String(data.Plaintext))
+      .then(plaintext => {
+        console.log(`decrypted: ${plaintext}`);
+        return plaintext;
+      })
+      .catch(e => {
+        console.error('decryption problem!');
+        console.error(e);
+        throw e;
+      })
+    }
+    ```
+
 # Step 14b: Gating Downloads with JWT
 
 Now that our download-service Lambda is can read files out from S3, we'll add authentication. In order to allow it to authenticate requests statelessly we'll use JWTs. Using JWTs will allow us to verify the validity of download requests on our Lambda without relying on a session an external database. This way, we can create signed, dated requests somewhere else (anywhere else!) and verify them on our Lambda.
