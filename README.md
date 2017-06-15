@@ -1,5 +1,30 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 14b: Gating Downloads with JWT
+
+Now that our download-service Lambda is can read files out from S3, we'll add authentication. In order to allow it to authenticate requests statelessly we'll use JWTs. Using JWTs will allow us to verify the validity of download requests on our Lambda without relying on a session an external database. This way, we can create signed, dated requests somewhere else (anywhere else!) and verify them on our Lambda.
+
+The one value that needs to be shared across the JWT creator & JWT verifier is the secret used to sign the token. We'll pass this to our Lambda as an environment variable: `JWT_SECRET`.
+
+## Goals
+
+1.  Read an encoded JWT via the `token` query string parameter.
+2.  Decode & verify the token
+3.  If valid, extract the filename & send that file to the user
+4.  If not valid, send an error response
+
+## Hints
+
+*   `_events/generateSignedRequest.js` will create a dummy request object with a valid token
+    * The `jsonwebtoken` npm package must be added to our `download-service` package before this will work
+    * To try it: `node _events/generateSignedRequest | sls invoke local -f download`
+*   Our `JWT_SECRET` ("I've got a lovely bunch of coconuts") can be hardcoded in our service configuration file for now, we'll fix that next step.
+*   `npm init -y` in our `download-service` to allow tracking of module dependencies
+*   To test it on the deployed server:
+    1.  run `node _events/generateSignedRequest`
+    2.  copy the `token` property
+    3.  append it to your deployment URL: `?token=<the token you copied>`
+
 # Step 14a: Removing Assets: Downloads
 
 We will now remove our `downloads` directory to an S3 bucket as well, but because we want to restrict access to these assets, we'll need some authorization checks in front of it. We'll put them therefor in a bucket we *do not* expose over HTTP, but instead, expose through a Lambda. That will allow us to check download authorization before sending them the file. We'll save authorization for next step. In this step we'll get our Lambda set up, taking requests over HTTP, reading files from S3, and sending them back to the user.
