@@ -2,6 +2,7 @@
 
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({params: { Bucket: process.env.BOOKS_BUCKET } });
+const jwt = require('jsonwebtoken');
 
 module.exports.download = (event, context, callback) => {
   const token = event.queryStringParameters ? event.queryStringParameters.token : null;
@@ -17,8 +18,23 @@ module.exports.download = (event, context, callback) => {
 
   console.log(`looking up ${token}`);
 
+  let payload;
+  try{
+    payload = jwt.verify(token, process.env.JWT_SECRET);
+  }catch(e){
+    console.error('token problem!');
+    return callback(null, {
+      statusCode: 403,
+      body: JSON.stringify({
+        message: e.message
+      })
+    });
+  }
+
+  console.log(`user (${payload.username}) is downloading (${payload.filename})`);
+  
   s3.getObject({
-    Key: token
+    Key: payload.filename
   }).promise()
     .then(response => {
       console.log(response);
@@ -42,3 +58,4 @@ module.exports.download = (event, context, callback) => {
     });
 
 };
+

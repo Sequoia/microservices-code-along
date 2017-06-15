@@ -25,6 +25,7 @@ functions:
           method: get
     environment:
       BOOKS_BUCKET: ${self:custom.bucket}
+      JWT_SECRET: "I've got a lovely bunch of coconuts"
     # Misc 
     tags:
       app: books
