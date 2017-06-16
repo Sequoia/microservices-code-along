@@ -1,5 +1,51 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 18: Running our stack locally with docker-compose
+
+So far, we've been able to run each docker container in isolation and run a reverse proxy on our host to tie them together, but this is less than ideal. We're forced to expose several ports on our local machine, start and stop everything separately, and run nginx locally rather than in a container.
+
+In this step, we'll dockerize our `reverse-proxy` and create a `docker-compose.yml` to stand up our webapp container, our auth app container and an reverse-proxy that routes to them *inside* docker-compose. The only exposed port on our localhost at that point will be `8080`. This has the benefit of hiding services internally and exposing only one "face" to our client.
+
+## Goals
+
+1.  Dockerize nginx
+2.  Compose containers in `docker-compose.yml` (save file in the root of `microservices-code-along`)
+3.  Run with `docker-compose` and test that everything works
+
+## Hints
+
+*   An updated `nginx.conf` is included with this commit so you can focus on dockerizing & docker compose during this step. Be sure to check out the changes it contains!
+*   Make sure you've `docker stop`ped any running containers as well as `nginx` before running `docker-compose up`!
+*   Docker compose will need access to our `books-auth`, `webapp` and `reverseproxy` images, so be they are available locally (check with `docker images`)  
+    *   Don't forget to `docker build -t <you>/reverseproxy .`!
+*   `nginx -t -c /path/to/reverse-proxy/nginx.conf` will complain that it can't find your hostnames:
+    * `nginx: [emerg] host not found in upstream "webapp:80" in .../nginx.conf:20`
+    * This is because it's not running in the `docker-compose` environment. You'll have to build your `reverseproxy` image and trust that `webapp` will be available when nginx starts under `docker-compose`!
+*   `.env` files can be passed to containers via the `env_file` key on a service. Example:
+    ```Dockerfile
+        webapp:
+            env_file:
+                - monolith/.env # relative to the directory you run `docker-compose up` in!
+    ```
+
+*   Our `reverseproxy` service in `docker-compose.yml` will need `links` property linking it to the other two services so it can access them
+    ```Dockerfile
+    reverseproxy:
+        links:
+            - "webapp"
+            - "auth"
+    ```
+
+*   `docker-compose config` is a handy way to check that your configuration works & see what it will look like with all env files read etc.
+*   Relevant docker compose docs:
+    *   [`image`](https://docs.docker.com/compose/compose-file/compose-file-v2/#image)
+    *   [`restart`](https://docs.docker.com/compose/compose-file/compose-file-v2/#restart)
+    *   [`env_file`](https://docs.docker.com/compose/compose-file/compose-file-v2/#env_file)
+    *   [`links`](https://docs.docker.com/compose/compose-file/compose-file-v2/#links)
+        * make sure these values are wrapped in quotes! (Docs don't make this clear)
+    *   [`ports`](https://docs.docker.com/compose/compose-file/compose-file-v2/#ports)
+
+
 # Step 17: NGINX Reverse Proxy
 
 It's difficult to test our setup locally because we don't have `now`'s aliases (reverse proxies) linking our various components together. In this step we'll create an NGINX reverse proxy and set it up to link our apps together on `localhost:8080` just as they are on `<yourname>-monolith.now.sh`.
