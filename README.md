@@ -1,5 +1,34 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 17: NGINX Reverse Proxy
+
+It's difficult to test our setup locally because we don't have `now`'s aliases (reverse proxies) linking our various components together. In this step we'll create an NGINX reverse proxy and set it up to link our apps together on `localhost:8080` just as they are on `<yourname>-monolith.now.sh`.
+
+For this step you'll need `nginx` installed locally on your machine. If you'd prefer not to install `nginx` locally, you can wait 'til the next step where we'll run it in a docker container.
+
+## Goals
+
+1.  Install `nginx`
+2.  Create an `nginx.conf` that does the following:
+    1. Listens on port 8080
+    2. Forwards `/auth` to our auth docker container (`http://localhost:8091`)
+    3. Forwards `/Books` to our LoopBack API on Bluemix (`https://<yourname>-books-api.mybluemix.net`)
+    4. Forwards all other requests to our webapp docker container (`http://localhost:8090`)
+3. Run nginx locally with our `nginx.conf` and see that login, buy, and download work on `http://localhost:8080`
+
+## Hints
+
+*   A starter `nginx.conf` file can be found in `reverse-proxy/nginx.conf`
+*   Basic `nginx` config file introduction: http://nginx.org/en/docs/beginners_guide.html#conf_structure
+*   Configuring `locations`: http://nginx.org/en/docs/http/ngx_http_core_module.html#location
+*   Configuring a `location` to act as a proxy: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass
+*   `nginx -t -c /full/absolute/path/to/microservices-code-along/reverse-proxy/nginx.conf`
+    **Test** your nginx config
+*   `nginx -c /full/absolute/path/to/microservices-code-along/reverse-proxy/nginx.conf`
+    **Run** nginx with your nginx config
+*   `nginx -s stop`
+    **Stop nginx**
+
 # Step 16: Dockerizing Webapp
 
 This step is about the same as last step, but this time we're dockerizing `monolith`.
