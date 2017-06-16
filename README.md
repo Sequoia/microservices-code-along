@@ -1,5 +1,25 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 16: Dockerizing Webapp
+
+This step is about the same as last step, but this time we're dockerizing `monolith`.
+
+## Goals
+
+1. Create docker image of `monolith`
+2. Run it locally
+3. Deploy it to `now.sh`
+4. Alias the `now.sh` deploy and test that `/buy/2` still works
+
+## Hints
+
+*   Remember to update your `.env` file to remove wrapping quotes and escapes as before!
+*   Remember to replace the `lib` link with a copy of `lib` as before!
+*   Remember to pass `--docker` to `now` so it knows it's a docker image (because we have a `package.json` *and* dockerfile we need to tell it which type of build to use)
+*   Example build command: `docker build -t you/webapp .`
+*   Example run command: `docker run --name webapp -p 8090:80 -d --env-file=.env you/webapp`
+*   Test it locally: `curl localhost:8090/login.html` should return the login page
+
 # Step 15: Dockerizing Auth App
 
 We've got our application stack running on `now.sh` directly using the Node runtime, but if we want the flexibility to ship to different providers it would be useful to dockerize our services. Now.sh supports the Node runtime directly, but it can also run docker images, allowing us to use whatever runtime we want. In this step we'll create a Dockerfile to run our `auth` service, run it locally, then ship it to `now.sh`.
