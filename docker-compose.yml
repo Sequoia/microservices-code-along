@@ -1,0 +1,24 @@
+version: '2'
+ 
+services:
+
+  webapp:
+    image: 34ks/webapp
+    restart: always
+    env_file:
+      - monolith/.env
+
+  auth:
+    image: 34ks/books-auth
+    restart: always
+    env_file:
+      - auth/.env
+
+  reverseproxy:
+    image: 34ks/reverseproxy
+    ports:
+      - "8080:8080"
+    restart: always
+    links: 
+      - "webapp"
+      - "auth"
