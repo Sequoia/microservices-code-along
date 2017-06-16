@@ -1,5 +1,49 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 15: Dockerizing Auth App
+
+We've got our application stack running on `now.sh` directly using the Node runtime, but if we want the flexibility to ship to different providers it would be useful to dockerize our services. Now.sh supports the Node runtime directly, but it can also run docker images, allowing us to use whatever runtime we want. In this step we'll create a Dockerfile to run our `auth` service, run it locally, then ship it to `now.sh`.
+
+## Goals
+
+1. Create docker image of `auth`
+2. Run it locally
+3. Deploy it to `now.sh`
+4. Alias the `now.sh` deploy and test that login still works
+
+## Hints
+
+* Docker `run` takes a `--env-file=.env` argument, but **it parses env files differently than the shell does!**
+    *   Remove all wrapping quotes and escape characters for the `.env` file to work with `docker run --env-file=.env`
+        ```ini
+        # before:
+        # SESSION_SECRET='keyboard cat'
+        # update to:
+        SESSION_SECRET=keyboard cat
+        ```
+* Docker cannot include directories outside the `CWD` in which you run `docker build`, so it cannot follow the `./lib` link to `../lib`
+    *   The proper solution here is to externalize `lib` to an NPM package included by those services which need it.
+    *   For the purpose of expediency, in our case we'll simply remove the `auth/lib` link and copy the `lib` directory into `auth`
+        ```sh
+        cd auth
+        rm lib
+        cp -r ../lib .
+        ```
+
+*   Our `Dockefile` will need to run `npm run build` explicitly since we're no longer relying on `now`s node startup process. Example:
+    ```Dockerfile
+    # Bundle app source
+    COPY . /usr/src/app
+    # After source is copied, run `npm run build`
+    RUN npm run build
+    ```
+
+*   Example build command: `docker build -t <you>/books-auth .`
+*   Example run command: `docker run --name books-auth -p 8091:80 -d --env-file=.env <you>/books-auth`
+    * forwards local port 8091 to port 80 on the docker image
+*   Test it locally: `curl localhost:8091/auth/account` should return a "please login" message
+*   Add a `.dockerignore` file to avoid copying `**/node_modules`, `**/npm-debug.log`, `**/.env` and whatever other files are not needed for the image.
+
 # Step 14d: Generating JWTs on our "webapp" server
 
 Our lambda is now verifying JWTs, but we need some way for users to generate them. Currently, the "buy" on our webapp server (in the `monolith` directory) does the following:
