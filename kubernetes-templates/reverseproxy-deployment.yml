@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: reverseproxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: reverseproxy
+      labels: # arbitrary key/value pairs (metadata)
+        name: reverseproxy
+        stack: books
+        role: external-facing
+    spec: # defines containers etc.
+      containers: 
+        - name: reverseproxy
+          image: 34ks/reverseproxy	# pull from docker registry
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP

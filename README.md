@@ -1,5 +1,45 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 19: Deploying our Containers in a Kubernetes Cluster
+
+In this step we'll be creating Kubernetes configurations for our auth, reverseproxy and webapp services and deploying them locally.
+
+While it's possible to create pods directly in Kubernetes, it's prefereable to use a "Deployment" object (a type of "controller") to create them.  Internally, the following happens:
+
+1.  Deployment is created with `n` replicas of a spec
+2.  A ReplicationSet is created by the Deployment to run the `n` replicas
+3.  `n` Pods are created by the ReplicationSet.
+
+It's that simple! ;)
+
+We'll create Deployments for our reverseproxy, auth, and webapp containers on our local minikube. We'll write the deployment templates in a yml file, `auth-deployment.yml` etc. `reverseproxy-deployment.yml` has been provided as a template.
+
+We'll create corresponding Services for each Deployment so they can communicate. auth & webapp Services will be of the default service type (`ClusterIP`, only addressable within the cluster), and reverseproxy Service will be of the type `NodePort`, which exposes a port on each of the Nodes running in that cluster. Our cluster is the local one run by minikube right now, you can find the ports exposed by minikube via `minikube service list` or the Services pane in the kubernetes dashboard (`minikube dashboard`).
+
+## Goals
+
+0. Create secrets object to store secrets
+1. Create webapp service and deployment
+2. Create auth service and deployment
+3. Create reverseproxy service and deployment
+4. Get the IP/port exposed on the reverseproxy and check that things still work.
+
+## Hints
+
+*   **These deployments rely on a `books` secrets object!** Make sure to create that first (see `make-secrets-example.sh`)
+*   Kubernetes will try to pull images from dockerhub and it runs its own local dockermachine.
+*   To tell it to only pull images that don't exist locally, add `imagePullPolicy: IfNotPresent` to each `containers` configuration object
+*   To point your local `docker` command at the minikube docker-machine so you can build locally & cache images in the minikube docker-machine:
+    *   `eval $(minikube docker-env)`
+    *   run `docker image` to see that it's a different list. (Also, you can shut down docker desktop as you're not using it)
+    *   You can now `docker build` into the minikube docker machine & minikube will not try to pull them from dockerhub
+    *   **If you do not do this** you **must** push images to dockerhub before attempting to create deployments based on those images.
+*   There's a `testbox` template in `/misc` that's useful for running curl/nslookup on other machines in your cluster locally
+    *   `kubectl create -f misc/test-pod.yml` to create
+    *   `kubectl exec -ti testbox -- nslookup reverseproxy` to see if you can route to hostname:reverseproxy
+    *   `kubectl exec -ti testbox -- env` to take a look at the environment variables present
+    *   `kubectl exec -ti testbox -- env` to take a look at the environment variables present
+
 # Step 18: Running our stack locally with docker-compose
 
 So far, we've been able to run each docker container in isolation and run a reverse proxy on our host to tie them together, but this is less than ideal. We're forced to expose several ports on our local machine, start and stop everything separately, and run nginx locally rather than in a container.
