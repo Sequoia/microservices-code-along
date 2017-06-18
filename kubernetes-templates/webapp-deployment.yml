@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: webapp
+      labels: # arbitrary key/value pairs (metadata)
+        name: webapp
+        stack: books
+    spec: # defines containers etc.
+      containers: 
+        - name: webapp
+          image: 34ks/webapp	# pull from docker registry
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: DOWNLOAD_PATH
+              value: "https://c16g06ffp1.execute-api.us-west-2.amazonaws.com/dev/download"
+            - name: BOOKS_API
+              value: "https://sequoia-books-api.mybluemix.net/Books/"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: JWT_SECRET
+            - name: REDIS_SESSION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: REDIS_SESSION_URL
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: SESSION_SECRET

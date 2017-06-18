@@ -1,0 +1,37 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: auth
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: auth
+      labels: # arbitrary key/value pairs (metadata)
+        name: auth
+        stack: books
+    spec: # defines containers etc.
+      containers: 
+        - name: auth
+          image: 34ks/books-auth	# pull from docker registry
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: MONGO_USER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: MONGO_USER_URL
+            - name: REDIS_SESSION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: REDIS_SESSION_URL
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: books
+                  key: SESSION_SECRET
