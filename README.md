@@ -1,5 +1,26 @@
 ℹ️ *See [INSTRUCTIONS.md](INSTRUCTIONS.md) for notes on using this repository.*
 
+# Step 20: Deploying to Google Container Engine (GKE)
+
+This step is similar to our last one with a few changes. The main change is that on a cloud provider such as Google Cloud, `LoadBalancer` type services are used to expose ports externally rather than `NodePort` type services.
+
+## Goals
+
+1.  Create a cluster on GKE
+2.  Create your secrets, deployments, and services on this cluster
+3.  Check that it works
+
+## Hints
+
+*   `NodePort` service must be replaced with `LoadBalancer` type service
+    *   The `NodePort` template file has been appended with `.bak` so you don't accidentally deploy it to GKE
+    *   Copy this file to `reverseproxy-LoadBalancer-service.yml` and edit that one so you keep both types.
+*   If your cluster doesn't have enough resources for your deployments, simple scale the cluster up a bit: `gcloud container clusters resize <cluster name> --zone=<zone> --size=2`
+*   **Don't forget to shut down your cluster when you're done!!**
+    *   Otherwise you might get a bill from Google Cloud that you weren't expecting!
+    *   `gcloud container clusters resize <cluster name> --zone=<zone> --size=0`
+    *   Optionally: `gcloud container clusters delete <cluster name> ...`
+
 # Step 19: Deploying our Containers in a Kubernetes Cluster
 
 In this step we'll be creating Kubernetes configurations for our auth, reverseproxy and webapp services and deploying them locally.
